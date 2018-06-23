@@ -1,14 +1,27 @@
 require 'discordrb'
+
 token = File.read('token').strip
 bot = Discordrb::Bot.new token: token
 
+krazyito_id = 92716502255439872
+krazyito_distinct = 'Krazyito#1696'
 users = {}
 all_winners = {}
 all_winners_keys = {}
 keys = []
 
-File.foreach('keys').with_index do |line, index|
-  keys[index] = line.strip
+def use_real_keys?
+  return false 
+end
+
+if use_real_keys?
+  File.foreach('keys').with_index do |line, index|
+    keys[index] = line.strip
+  end
+else
+  for i in 0..49
+    keys[i] = "BETA-KEY-#{i+1}"
+  end
 end
 
 current = nil
@@ -27,13 +40,17 @@ while current != last_current
     users[u] = message.user
   end
 end
-users.delete('Krazyito#1696')
-puts users.keys
+krazyito_user = users[krazyito_distinct]
+users.delete(krazyito_distinct)
+p users.keys
 puts "entries: #{users.length}"
 
-bot.message(with_text: 'parse', from: 92716502255439872) do |event|
+bot.message(with_text: 'parse', from: krazyito_id) do |event|
   all_winners = {}
   entries = users.keys
+  entries.shuffle!
+  puts "shuffled entries"
+  p entries
   puts "# OF ENTRIES #{entries.length}"
   for i in 0..49
     winner = entries[rand(entries.size)]
@@ -48,17 +65,19 @@ bot.message(with_text: 'parse', from: 92716502255439872) do |event|
     win_string += "#{user.mention} "
   end
 
-  # event.respond "#{win_string}"
+  # event.respond "#{win_string}.  Please message Krazyito if you have issues."
+  # event.respond "Your keys have been whispered to you via the bot.
   puts 'WINNERS:'
   i = 0
   all_winners.each do |name, user|
     all_winners_keys[name] = keys[i]
-    # user.pm("Your beta key is: `#{keys[i]}`.
+	# user.pm("Your beta key is: `#{keys[i]}`.
 # You can redeem this code in your Battle.net account management interface https://battle.net/account/management/claim-code.html
 # These messages are not monitored. Please message Krazyito#1696 if you have issues.")
     i += 1
   end
-  puts all_winners_keys
+  # krazyito_user.pm("#{all_winners_keys}")
+  p all_winners_keys
   puts all_winners_keys.length
 end
 
